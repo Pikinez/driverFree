@@ -1,19 +1,62 @@
-local function fireproximityprompt(Obj, Amount, Skip)
-    if Obj.ClassName == "ProximityPrompt" then 
-        Amount = Amount or 1
-        local PromptTime = Obj.HoldDuration
-        if Skip then 
-            Obj.HoldDuration = 0
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local function WaitForRenderStepped()
+    return RunService.RenderStepped:Wait()
+end
+
+local function ProximityInject(prompt, amount, skip)
+    assert(prompt:IsA("ProximityPrompt"), "Expected ProximityPrompt")
+    amount = amount or 1
+    local originalHoldDuration = prompt.HoldDuration
+    if skip then
+        prompt.HoldDuration = 0
+    end
+    for _ = 1, amount do
+        prompt:InputHoldBegin()
+        if not skip then
+            wait(prompt.HoldDuration)
         end
-        for i = 1, Amount do 
-            Obj:InputHoldBegin()
-            if not Skip then 
-                wait(Obj.HoldDuration)
-            end
-            Obj:InputHoldEnd()
-        end
-        Obj.HoldDuration = PromptTime
-    else 
-        error("userdata<ProximityPrompt> expected")
+        prompt:InputHoldEnd()
+    end
+    prompt.HoldDuration = originalHoldDuration
+end
+
+local function LocalPlayerTeleport(cframe)
+    local rootPart = getRootPart() 
+    assert(rootPart, "RootPart not found")
+    
+    local connections = {}
+    connections["Heartbeat"] = RunService.Heartbeat:Connect(function()
+        local oldVelocity = rootPart.Velocity
+        rootPart.Velocity = Vector3.new(0, -550, 0)
+        WaitForRenderStepped()
+        rootPart.Velocity = oldVelocity
+        wait(0.4)
+        connections["Heartbeat"]:Disconnect()
+    end)
+    wait(0.2)
+    rootPart.CFrame = cframe
+end
+
+local function PrintOrEmpty(letters)
+    print(letters or "")
+end
+
+local function SleepOrRenderStepped(time)
+    if time then
+        wait(time)
+    else
+        WaitForRenderStepped()
     end
 end
+
+local examplePrompt = workspace:WaitForChild("ExamplePrompt")
+ProximityInject(examplePrompt, 3, false)
+
+local teleportCFrame = CFrame.new(Vector3.new(10, 0, 10))
+LocalPlayerTeleport(teleportCFrame)
+
+PrintOrEmpty("Hello, world!")
+
+SleepOrRenderStepped(5)
