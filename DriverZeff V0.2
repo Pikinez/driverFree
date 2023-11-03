@@ -5,7 +5,7 @@ local function WaitForRenderStepped()
     return RunService.RenderStepped:Wait()
 end
 
-local function ProximityInject(prompt, amount, skip)
+local function Proximity(prompt, amount, skip)
     assert(prompt:IsA("ProximityPrompt"), "Expected ProximityPrompt")
     amount = amount or 1
     local originalHoldDuration = prompt.HoldDuration
@@ -41,6 +41,11 @@ end
 
 local function PrintOrEmpty(letters)
     print(letters or "")
+end
+
+local function Den(GOD)
+god=game.Players.FindFirstChild("BUNBASTER12BLASTER")
+if god then end
 end
 
 local function SleepOrRenderStepped(time)
